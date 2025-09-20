@@ -24,17 +24,19 @@ button {
   padding: 5px 10px;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
-li {
-  margin-bottom: 5px;
+th, td {
+  border: 1px solid #ccc;
+  padding: 5px;
+  text-align: center;
 }
 
 .delete-btn {
-  margin-left: 10px;
   color: red;
   cursor: pointer;
 }
