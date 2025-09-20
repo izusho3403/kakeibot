@@ -1,0 +1,81 @@
+// LIFF初期化
+liff.init({ liffId: "2008085033" })
+  .then(() => {
+    if (!liff.isLoggedIn()) liff.login();
+  })
+  .catch(err => console.error(err));
+
+// DOM取得
+const form = document.getElementById("kakeiboForm");
+const recordList = document.getElementById("recordList");
+const totalEl = document.getElementById("total");
+const categoryChart = document.getElementById("categoryChart");
+
+// データ取得
+let records = JSON.parse(localStorage.getItem("kakeibo")) || [];
+
+// Chart.js用
+let chart;
+
+// 表示更新
+function updateDisplay() {
+  recordList.innerHTML = "";
+  let total = 0;
+  const categoryTotals = { "食費":0, "交通費":0, "趣味":0, "その他":0 };
+
+  records.forEach((rec, idx) => {
+    const li = document.createElement("li");
+    li.textContent = `${rec.item} (${rec.category}): ${rec.amount}円`;
+
+    const delBtn = document.createElement("span");
+    delBtn.textContent = "×";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = () => {
+      records.splice(idx, 1);
+      updateDisplay();
+    };
+    li.appendChild(delBtn);
+    recordList.appendChild(li);
+
+    total += rec.amount;
+    categoryTotals[rec.category] += rec.amount;
+  });
+
+  totalEl.textContent = total;
+  localStorage.setItem("kakeibo", JSON.stringify(records));
+
+  // グラフ描画
+  if (chart) chart.destroy();
+  chart = new Chart(categoryChart, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(categoryTotals),
+      datasets: [{
+        label: 'カテゴリ別支出',
+        data: Object.values(categoryTotals),
+        backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#A9A9A9']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+// フォーム送信
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const item = document.getElementById("item").value;
+  const amount = parseInt(document.getElementById("amount").value);
+  const category = document.getElementById("category").value;
+  if (item && !isNaN(amount)) {
+    records.push({ item, amount, category });
+    updateDisplay();
+    form.reset();
+  }
+});
+
+// 初期表示
+updateDisplay();
