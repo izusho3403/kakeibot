@@ -1,35 +1,82 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>家計簿</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>家計簿アプリ</h1>
+// LIFF初期化
+liff.init({ liffId: "2008147271-LzY7e2KN" })
+  .then(() => {
+    if (!liff.isLoggedIn()) liff.login();
+  })
+  .catch(err => console.error(err));
 
-  <form id="kakeiboForm">
-    <input type="text" id="item" placeholder="項目名" required>
-    <input type="number" id="amount" placeholder="金額" required>
-    <select id="category">
-      <option value="食費">食費</option>
-      <option value="交通費">交通費</option>
-      <option value="趣味">趣味</option>
-      <option value="その他">その他</option>
-    </select>
-    <button type="submit">追加</button>
-  </form>
+// DOM取得
+const form = document.getElementById("kakeiboForm");
+const recordList = document.getElementById("recordList");
+const totalEl = document.getElementById("total");
+const categoryChart = document.getElementById("categoryChart");
 
-  <ul id="recordList"></ul>
-  <h2>合計: <span id="total">0</span>円</h2>
+// データ取得
+let records = JSON.parse(localStorage.getItem("kakeibo")) || [];
 
-  <canvas id="categoryChart"></canvas>
+// Chart.js用
+let chart;
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+// 表示更新
+function updateDisplay() {
+  recordList.innerHTML = "";
+  let total = 0;
+  const categoryTotals = { "食費":0, "交通費":0, "趣味":0, "その他":0 };
+
+  records.forEach((rec, idx) => {
+    const li = document.createElement("li");
+    li.textContent = `${rec.item} (${rec.category}): ${rec.amount}円`;
+
+    const delBtn = document.createElement("span");
+    delBtn.textContent = "×";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = () => {
+      records.splice(idx, 1);
+      updateDisplay();
+    };
+    li.appendChild(delBtn);
+    recordList.appendChild(li);
+
+    total += rec.amount;
+    categoryTotals[rec.category] += rec.amount;
+  });
+
+  totalEl.textContent = total;
+  localStorage.setItem("kakeibo", JSON.stringify(records));
+
+  // グラフ描画
+  if (chart) chart.destroy();
+  chart = new Chart(categoryChart, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(categoryTotals),
+      datasets: [{
+        label: 'カテゴリ別支出',
+        data: Object.values(categoryTotals),
+        backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#A9A9A9']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+// フォーム送信
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const item = document.getElementById("item").value;
+  const amount = parseInt(document.getElementById("amount").value);
+  const category = document.getElementById("category").value;
+  if (item && !isNaN(amount)) {
+    records.push({ item, amount, category });
+    updateDisplay();
+    form.reset();
+  }
+});
+
+// 初期表示
+updateDisplay();
+
