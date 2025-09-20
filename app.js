@@ -11,17 +11,48 @@ const tableBody = document.querySelector("#recordTable tbody");
 const totalIncomeEl = document.getElementById("totalIncome");
 const totalExpenseEl = document.getElementById("totalExpense");
 const expenseChart = document.getElementById("expenseChart");
+const categorySelect = document.getElementById("category");
+const addCategoryBtn = document.getElementById("addCategoryBtn");
+const newCategoryInput = document.getElementById("newCategory");
 
-// データ取得
+// 初期カテゴリ
+let categories = JSON.parse(localStorage.getItem("categories")) || ["食費","交通費","趣味","その他"];
 let records = JSON.parse(localStorage.getItem("kakeibo")) || [];
 let chart;
 
-// 表示更新関数
+// カテゴリをセレクトに反映
+function renderCategories() {
+  categorySelect.innerHTML = "";
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
+  });
+}
+renderCategories();
+
+// カテゴリ追加
+addCategoryBtn.onclick = () => {
+  const newCat = newCategoryInput.value.trim();
+  if (newCat && !categories.includes(newCat)) {
+    categories.push(newCat);
+    localStorage.setItem("categories", JSON.stringify(categories));
+    renderCategories();
+    newCategoryInput.value = "";
+    alert(`カテゴリ「${newCat}」を追加しました`);
+  } else {
+    alert("カテゴリ名が空か既存のカテゴリです");
+  }
+};
+
+// 表示更新
 function updateDisplay() {
   tableBody.innerHTML = "";
   let totalIncome = 0;
   let totalExpense = 0;
-  const categoryTotals = { "食費":0, "交通費":0, "趣味":0, "その他":0 };
+  const categoryTotals = {};
+  categories.forEach(cat => categoryTotals[cat] = 0);
 
   records.forEach((rec, idx) => {
     const tr = document.createElement("tr");
@@ -38,7 +69,7 @@ function updateDisplay() {
     if (rec.type === "収入") totalIncome += rec.amount;
     else {
       totalExpense += rec.amount;
-      categoryTotals[rec.category] += rec.amount;
+      if(categoryTotals.hasOwnProperty(rec.category)) categoryTotals[rec.category] += rec.amount;
     }
   });
 
@@ -55,15 +86,16 @@ function updateDisplay() {
     };
   });
 
-  // 円グラフ描画
+  // 円グラフ描画（色を自動割り当て）
+  const colors = categories.map((_,i) => `hsl(${i*50 % 360},70%,60%)`);
   if (chart) chart.destroy();
   chart = new Chart(expenseChart, {
     type: 'pie',
     data: {
-      labels: Object.keys(categoryTotals),
+      labels: categories,
       datasets: [{
-        data: Object.values(categoryTotals),
-        backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#A9A9A9']
+        data: categories.map(cat => categoryTotals[cat]),
+        backgroundColor: colors
       }]
     },
     options: {
