@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>本格家計簿LIFF</title>
+  <title>家計簿アプリ（カテゴリ追加対応）</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>家計簿アプリ</h1>
 
+  <!-- 収入/支出と項目入力 -->
   <form id="kakeiboForm">
     <div>
       <label><input type="radio" name="type" value="支出" checked> 支出</label>
@@ -16,15 +17,16 @@
     </div>
     <input type="text" id="item" placeholder="項目名" required>
     <input type="number" id="amount" placeholder="金額" required>
-    <select id="category">
-      <option value="食費">食費</option>
-      <option value="交通費">交通費</option>
-      <option value="趣味">趣味</option>
-      <option value="その他">その他</option>
-    </select>
+    <select id="category"></select>
     <input type="text" id="memo" placeholder="メモ">
     <button type="submit">追加</button>
   </form>
+
+  <!-- カテゴリ追加 -->
+  <div style="text-align:center; margin-bottom:10px;">
+    <input type="text" id="newCategory" placeholder="新しいカテゴリ">
+    <button type="button" id="addCategoryBtn">カテゴリ追加</button>
+  </div>
 
   <h2>一覧</h2>
   <table id="recordTable">
