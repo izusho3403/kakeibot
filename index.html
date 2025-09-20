@@ -1,90 +1,93 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>家計簿</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>家計簿アプリ</h1>
+// LIFF初期化
+liff.init({ liffId: "2008147271-LzY7e2KN" })
+  .then(() => {
+    if (!liff.isLoggedIn()) liff.login();
+  })
+  .catch(err => console.error(err));
 
-  <form id="kakeiboForm">
-    <div>
-      <label><input type="radio" name="type" value="支出" checked> 支出</label>
-      <label><input type="radio" name="type" value="収入"> 収入</label>
-    </div>
-    <input type="text" id="item" placeholder="項目名" required>
-    <input type="number" id="amount" placeholder="金額" required>
-    <select id="category">
-      <option value="食費">食費</option>
-      <option value="交通費">交通費</option>
-      <option value="趣味">趣味</option>
-      <option value="その他">その他</option>
-    </select>
-    <input type="text" id="memo" placeholder="メモ">
-    <button type="submit">追加</button>
-  </form>
+// DOM取得
+const form = document.getElementById("kakeiboForm");
+const tableBody = document.querySelector("#recordTable tbody");
+const totalIncomeEl = document.getElementById("totalIncome");
+const totalExpenseEl = document.getElementById("totalExpense");
+const expenseChart = document.getElementById("expenseChart");
 
-  <h2>一覧</h2>
-  <table id="recordTable">
-    <thead>
-      <tr>
-        <th>種類</th>
-        <th>項目</th>
-        <th>カテゴリ</th>
-        <th>金額</th>
-        <th>メモ</th>
-        <th>削除</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+// データ取得
+let records = JSON.parse(localStorage.getItem("kakeibo")) || [];
+let chart;
 
-  <h2>合計</h2>
-  <p>収入: <span id="totalIncome">0</span>円 / 支出: <span id="totalExpense">0</span>円</p>
+// 表示更新関数
+function updateDisplay() {
+  tableBody.innerHTML = "";
+  let totalIncome = 0;
+  let totalExpense = 0;
+  const categoryTotals = { "食費":0, "交通費":0, "趣味":0, "その他":0 };
 
-  <canvas id="expenseChart"></canvas>
+  records.forEach((rec, idx) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${rec.type}</td>
+      <td>${rec.item}</td>
+      <td>${rec.category}</td>
+      <td>${rec.amount}</td>
+      <td>${rec.memo || ""}</td>
+      <td><span class="delete-btn" data-idx="${idx}">×</span></td>
+    `;
+    tableBody.appendChild(tr);
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>家計簿</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>家計簿アプリ</h1>
+    if (rec.type === "収入") totalIncome += rec.amount;
+    else {
+      totalExpense += rec.amount;
+      categoryTotals[rec.category] += rec.amount;
+    }
+  });
 
-  <form id="kakeiboForm">
-    <input type="text" id="item" placeholder="項目名" required>
-    <input type="number" id="amount" placeholder="金額" required>
-    <select id="category">
-      <option value="食費">食費</option>
-      <option value="交通費">交通費</option>
-      <option value="趣味">趣味</option>
-      <option value="その他">その他</option>
-    </select>
-    <button type="submit">追加</button>
-  </form>
+  totalIncomeEl.textContent = totalIncome;
+  totalExpenseEl.textContent = totalExpense;
+  localStorage.setItem("kakeibo", JSON.stringify(records));
 
-  <ul id="recordList"></ul>
-  <h2>合計: <span id="total">0</span>円</h2>
+  // 削除ボタン
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.onclick = () => {
+      const idx = btn.getAttribute("data-idx");
+      records.splice(idx, 1);
+      updateDisplay();
+    };
+  });
 
-  <canvas id="categoryChart"></canvas>
+  // 円グラフ描画
+  if (chart) chart.destroy();
+  chart = new Chart(expenseChart, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(categoryTotals),
+      datasets: [{
+        data: Object.values(categoryTotals),
+        backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#A9A9A9']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+}
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+// フォーム送信
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const type = form.type.value;
+  const item = document.getElementById("item").value;
+  const amount = parseInt(document.getElementById("amount").value);
+  const category = document.getElementById("category").value;
+  const memo = document.getElementById("memo").value;
+
+  if (item && !isNaN(amount)) {
+    records.push({ type, item, amount, category, memo });
+    updateDisplay();
+    form.reset();
+  }
+});
+
+// 初期表示
+updateDisplay();
