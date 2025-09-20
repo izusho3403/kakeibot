@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家計簿</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>家計簿アプリ</h1>
+
+  <form id="kakeiboForm">
+    <input type="text" id="item" placeholder="項目名" required>
+    <input type="number" id="amount" placeholder="金額" required>
+    <select id="category">
+      <option value="食費">食費</option>
+      <option value="交通費">交通費</option>
+      <option value="趣味">趣味</option>
+      <option value="その他">その他</option>
+    </select>
+    <button type="submit">追加</button>
+  </form>
+
+  <ul id="recordList"></ul>
+  <h2>合計: <span id="total">0</span>円</h2>
+
+  <canvas id="categoryChart"></canvas>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
