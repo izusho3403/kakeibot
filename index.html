@@ -1,57 +1,108 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>家計簿アプリ</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>家計簿（月別＋予算アラート）</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>家計簿アプリ</h1>
+  <header>
+    <h1>家計簿アプリ</h1>
+  </header>
 
-  <!-- 収入/支出と項目入力 -->
-  <form id="kakeiboForm">
-    <div>
-      <label><input type="radio" name="type" value="支出" checked> 支出</label>
-      <label><input type="radio" name="type" value="収入"> 収入</label>
-    </div>
-    <input type="text" id="item" placeholder="項目名" required>
-    <input type="number" id="amount" placeholder="金額" required>
-    <select id="category"></select>
-    <input type="text" id="memo" placeholder="メモ">
-    <button type="submit">追加</button>
-  </form>
+  <main>
+    <!-- コントロール : 月選択 -->
+    <section class="controls">
+      <label>表示月:
+        <input type="month" id="monthPicker">
+      </label>
 
-  <!-- カテゴリ追加 -->
-  <div style="text-align:center; margin-bottom:10px;">
-    <input type="text" id="newCategory" placeholder="新しいカテゴリ">
-    <button type="button" id="addCategoryBtn">カテゴリ追加</button>
-  </div>
+      <label class="budget-label">予算(円):
+        <input type="number" id="budgetInput" min="0" placeholder="今月の予算">
+        <button id="saveBudgetBtn" type="button">保存</button>
+      </label>
 
-  <h2>一覧</h2>
-  <table id="recordTable">
-    <thead>
-      <tr>
-        <th>種類</th>
-        <th>項目</th>
-        <th>カテゴリ</th>
-        <th>金額</th>
-        <th>メモ</th>
-        <th>削除</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+      <div class="budget-status">
+        <div>予算: <span id="budgetDisplay">0</span>円</div>
+        <div>支出: <span id="monthExpense">0</span>円</div>
+        <div>残り: <span id="budgetRemain">0</span>円</div>
+      </div>
+    </section>
 
-  <h2>合計</h2>
-  <p>収入: <span id="totalIncome">0</span>円 / 支出: <span id="totalExpense">0</span>円</p>
+    <!-- 入力フォーム -->
+    <section class="form-section">
+      <form id="kakeiboForm">
+        <div class="row">
+          <label class="type-group">
+            <label><input type="radio" name="type" value="支出" checked> 支出</label>
+            <label><input type="radio" name="type" value="収入"> 収入</label>
+          </label>
 
-  <canvas id="expenseChart"></canvas>
+          <label>日付:
+            <input type="month" id="entryMonth" required>
+          </label>
+        </div>
 
-  <!-- Chart.js -->
+        <div class="row">
+          <input type="text" id="item" placeholder="項目名 (例: 昼ごはん)" required>
+          <input type="number" id="amount" placeholder="金額" required min="0">
+        </div>
+
+        <div class="row">
+          <select id="category"></select>
+          <input type="text" id="memo" placeholder="メモ (任意)">
+        </div>
+
+        <div class="row">
+          <button type="submit">追加</button>
+        </div>
+      </form>
+
+      <!-- カテゴリ追加 -->
+      <div class="add-category">
+        <input type="text" id="newCategory" placeholder="新しいカテゴリ">
+        <button id="addCategoryBtn" type="button">カテゴリ追加</button>
+      </div>
+    </section>
+
+    <!-- 一覧テーブル -->
+    <section>
+      <h2>一覧 (<span id="displayMonthLabel"></span>)</h2>
+      <div class="table-wrap">
+        <table id="recordTable">
+          <thead>
+            <tr>
+              <th>日付</th>
+              <th>種類</th>
+              <th>項目</th>
+              <th>カテゴリ</th>
+              <th>金額</th>
+              <th>メモ</th>
+              <th>削除</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- グラフ -->
+    <section>
+      <h2>支出カテゴリ比率</h2>
+      <canvas id="expenseChart"></canvas>
+    </section>
+
+    <!-- 合計表示 -->
+    <section class="summary">
+      <p>合計 — 収入: <span id="totalIncome">0</span>円　/　支出: <span id="totalExpense">0</span>円</p>
+    </section>
+  </main>
+
+  <!-- ライブラリ & スクリプト -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
+
