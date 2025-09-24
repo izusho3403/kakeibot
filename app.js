@@ -2,16 +2,18 @@
 const LIFF_ID = "2008147271-LzY7e2KN";
 /* ------------------------------------------------- */
 
-// LIFF初期化
-liff.init({ liffId: LIFF_ID })
-  .then(() => {
-    if (!liff.isLoggedIn()) liff.login();
-  })
-  .catch(err => console.error("LIFF init error:", err));
+// LIFF初期化（LINE上で動かすときはログインを促します）
+if (window.liff && typeof liff.init === "function") {
+  liff.init({ liffId: LIFF_ID })
+    .then(() => {
+      if (!liff.isLoggedIn()) liff.login();
+    })
+    .catch(err => console.error("LIFF init error:", err));
+}
 
 // ---------- DOM ----------
 const monthPicker = document.getElementById("monthPicker");
-const entryDate = document.getElementById("entryDate"); // ✅ 日付入力
+const entryDate = document.getElementById("entryDate");
 const budgetInput = document.getElementById("budgetInput");
 const saveBudgetBtn = document.getElementById("saveBudgetBtn");
 const budgetDisplay = document.getElementById("budgetDisplay");
@@ -59,13 +61,14 @@ function todayStr() {
 // 初期UI設定
 function initUI() {
   monthPicker.value = monthNow();
-  entryDate.value = todayStr(); // ✅ 今日の日付をデフォルトに
+  entryDate.value = todayStr();
   renderCategoryOptions();
+  console.log("initUI: monthPicker=", monthPicker.value, "entryDate=", entryDate.value);
   updateAllDisplays();
 }
 initUI();
 
-// ---------- カテゴリ操作 ----------
+// ---------- カテゴリ ----------
 function renderCategoryOptions() {
   categorySelect.innerHTML = "";
   categories.forEach(cat => {
@@ -83,20 +86,25 @@ addCategoryBtn.addEventListener("click", () => {
   localStorage.setItem(KEY_CATEGORIES, JSON.stringify(categories));
   renderCategoryOptions();
   newCategoryInput.value = "";
-  alert(`カテゴリ「${newCat}」を追加しました`);
+  console.log("Added category:", newCat);
   updateAllDisplays();
 });
 
-// ---------- 予算操作 ----------
+// ---------- 予算 ----------
 function getBudgetForMonth(monthStr) {
-  return budgets[monthStr] ? Number(budgets[monthStr]) : 0;
+  budgets = JSON.parse(localStorage.getItem(KEY_BUDGETS)) || {};
+  return Object.prototype.hasOwnProperty.call(budgets, monthStr) ? Number(budgets[monthStr]) : 0;
 }
 saveBudgetBtn.addEventListener("click", () => {
   const m = monthPicker.value || monthNow();
-  const val = parseInt(budgetInput.value);
+  const raw = budgetInput.value;
+  const val = raw === "" ? 0 : parseInt(raw, 10);
   if (isNaN(val) || val < 0) { alert("有効な予算を入力してください"); return; }
+  budgets = JSON.parse(localStorage.getItem(KEY_BUDGETS)) || {};
   budgets[m] = val;
   localStorage.setItem(KEY_BUDGETS, JSON.stringify(budgets));
+  budgetInput.value = val; // 確実に入力欄に反映
+  console.log("Saved budget:", m, val, "all budgets:", budgets);
   updateAllDisplays();
   alert(`${m} の予算を ${val} 円に設定しました`);
 });
@@ -105,25 +113,33 @@ saveBudgetBtn.addEventListener("click", () => {
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   const type = form.type.value;
-  const date = entryDate.value; // ✅ YYYY-MM-DD
+  let dateRaw = entryDate.value; // expecting YYYY-MM-DD
+  // fallback if empty or wrong format
+  if (!dateRaw || !/^\d{4}-\d{2}-\d{2}$/.test(dateRaw)) {
+    console.warn("entryDate empty or invalid, using today:", dateRaw);
+    dateRaw = todayStr();
+  }
   const item = document.getElementById("item").value.trim();
-  const amount = parseInt(document.getElementById("amount").value);
+  const amount = parseInt(document.getElementById("amount").value, 10);
   const category = categorySelect.value;
   const memo = document.getElementById("memo").value.trim();
 
   if (!item) { alert("項目名を入力してください"); return; }
   if (isNaN(amount)) { alert("金額を入力してください"); return; }
 
-  records.push({ type, date, item, amount, category, memo });
+  const rec = { type, date: dateRaw, item, amount, category, memo };
+  records.push(rec);
   localStorage.setItem(KEY_RECORDS, JSON.stringify(records));
+  console.log("Added record:", rec, "total records:", records.length);
   form.reset();
-  entryDate.value = todayStr(); // ✅ リセット後も日付は今日に戻す
+  entryDate.value = todayStr(); // keep date sensible
   updateAllDisplays();
 });
 
 // ---------- 削除 ----------
 function deleteRecord(indexAll) {
   if (!confirm("この項目を削除しますか？")) return;
+  console.log("Deleting record index:", indexAll, "record:", records[indexAll]);
   records.splice(indexAll, 1);
   localStorage.setItem(KEY_RECORDS, JSON.stringify(records));
   updateAllDisplays();
@@ -131,9 +147,14 @@ function deleteRecord(indexAll) {
 
 // ---------- 表示更新 ----------
 function updateAllDisplays() {
+  budgets = JSON.parse(localStorage.getItem(KEY_BUDGETS)) || {};
+  records = JSON.parse(localStorage.getItem(KEY_RECORDS)) || records; // reload in case changed elsewhere
+  console.log("updateAllDisplays: recordsLen=", records.length, "budgets=", budgets);
+
   const showMonth = monthPicker.value || monthNow(); // YYYY-MM
   displayMonthLabel.textContent = showMonth;
-  const monthRecords = records.filter(r => r.date.startsWith(showMonth)); // ✅ 月でフィルタ
+  const monthRecords = records.filter(r => typeof r.date === "string" && r.date.startsWith(showMonth));
+  console.log("showMonth:", showMonth, "monthRecords count:", monthRecords.length, monthRecords);
 
   // テーブル描画
   tableBody.innerHTML = "";
@@ -159,29 +180,29 @@ function updateAllDisplays() {
     };
   });
 
-  // 合計
+  // 合計計算
   let income = 0, expense = 0;
   const categoryTotals = {};
   categories.forEach(c => categoryTotals[c] = 0);
 
   monthRecords.forEach(r => {
-    if (r.type === "収入") income += r.amount;
+    if (r.type === "収入") income += Number(r.amount);
     else {
-      expense += r.amount;
+      expense += Number(r.amount);
       if (!categoryTotals[r.category]) categoryTotals[r.category] = 0;
-      categoryTotals[r.category] += r.amount;
+      categoryTotals[r.category] += Number(r.amount);
     }
   });
 
   totalIncomeEl.textContent = income;
   totalExpenseEl.textContent = expense;
 
-  // 予算
+  // 予算表示
   const budget = getBudgetForMonth(showMonth);
   budgetDisplay.textContent = budget;
   monthExpenseEl.textContent = expense;
-  budgetRemainEl.textContent = budget - expense;
-  budgetInput.value = budget;
+  budgetRemainEl.textContent = (budget - expense);
+  budgetInput.value = budget; // reflect in input
 
   if (budget > 0 && expense > budget) {
     budgetRemainEl.style.color = "red";
@@ -214,6 +235,13 @@ function renderExpenseChart(categoryTotals) {
 
 // ---------- イベント ----------
 monthPicker.addEventListener("change", updateAllDisplays);
+
+// 開発用ヘルパー（コンソールから呼べます）
+window._dbg = {
+  dumpRecords: () => console.log("records:", JSON.parse(localStorage.getItem(KEY_RECORDS))),
+  dumpBudgets: () => console.log("budgets:", JSON.parse(localStorage.getItem(KEY_BUDGETS))),
+  clearBudgets: () => { localStorage.removeItem(KEY_BUDGETS); console.log("budgets cleared"); updateAllDisplays(); }
+};
 
 // 初期描画
 updateAllDisplays();
