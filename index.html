@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>家計簿（月別＋予算アラート）</title>
+  <title>家計簿（日付入力対応）</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -40,7 +40,8 @@
           </label>
 
           <label>日付:
-            <input type="month" id="entryMonth" required>
+            <!-- ✅ 月入力から日付入力に変更 -->
+            <input type="date" id="entryDate" required>
           </label>
         </div>
 
@@ -105,4 +106,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
