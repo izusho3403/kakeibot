@@ -3,11 +3,14 @@ const LIFF_ID = "2008147271-LzY7e2KN"; // ここを変更しないでOK（あな
 /* ------------------------------------------------- */
 
 // LIFF初期化（LINE上で動かすときはログインを促します）
-liff.init({ liffId: LIFF_ID })
-  .then(() => {
-    if (!liff.isLoggedIn()) liff.login();
-  })
-  .catch(err => console.error("LIFF init error:", err));
+// (注意: ローカルでテストする場合は liff.init を一時無効にしてもOK)
+if (window.liff && typeof liff.init === "function") {
+  liff.init({ liffId: LIFF_ID })
+    .then(() => {
+      if (!liff.isLoggedIn()) liff.login();
+    })
+    .catch(err => console.error("LIFF init error:", err));
+}
 
 // ---------- DOM ----------
 const monthPicker = document.getElementById("monthPicker");
@@ -51,7 +54,6 @@ function monthNow() {
 
 // 初期UI設定
 function initUI() {
-  // 月ピッカーは現在月に
   monthPicker.value = monthNow();
   entryMonth.value = monthNow();
   renderCategoryOptions();
@@ -83,17 +85,29 @@ addCategoryBtn.addEventListener("click", () => {
 });
 
 // ---------- 予算操作 ----------
+// より頑健に取得する（0 や "" を誤判定しない）
 function getBudgetForMonth(monthStr) {
-  return budgets[monthStr] ? Number(budgets[monthStr]) : 0;
+  // 常に最新の budgets を localStorage から読み直す（他タブとの整合性）
+  budgets = JSON.parse(localStorage.getItem(KEY_BUDGETS)) || {};
+  return Object.prototype.hasOwnProperty.call(budgets, monthStr) ? Number(budgets[monthStr]) : 0;
 }
+
 saveBudgetBtn.addEventListener("click", () => {
   const m = monthPicker.value || monthNow();
-  const val = parseInt(budgetInput.value);
+  const raw = budgetInput.value;
+  const val = raw === "" ? 0 : parseInt(raw);
   if (isNaN(val) || val < 0) { alert("有効な予算を入力してください"); return; }
+  // budgets を最新化してから保存
+  budgets = JSON.parse(localStorage.getItem(KEY_BUDGETS)) || {};
   budgets[m] = val;
   localStorage.setItem(KEY_BUDGETS, JSON.stringify(budgets));
+
+  // ★入力欄にも反映（ここが重要）
+  budgetInput.value = val;
+
   updateAllDisplays();
   alert(`${m} の予算を ${val} 円に設定しました`);
+  console.log("Saved budgets:", budgets);
 });
 
 // ---------- データ追加 ----------
@@ -109,11 +123,10 @@ form.addEventListener("submit", (e) => {
   if (!item) { alert("項目名を入力してください"); return; }
   if (isNaN(amount)) { alert("金額を入力してください"); return; }
 
-  // レコード追加
   records.push({ type, date, item, amount, category, memo });
   localStorage.setItem(KEY_RECORDS, JSON.stringify(records));
   form.reset();
-  entryMonth.value = date; // リセットしても月は維持
+  entryMonth.value = date;
   updateAllDisplays();
 });
 
@@ -127,6 +140,9 @@ function deleteRecord(indexAll) {
 
 // ---------- 表示更新 ----------
 function updateAllDisplays() {
+  // 最新の予算データを読み直す（重要）
+  budgets = JSON.parse(localStorage.getItem(KEY_BUDGETS)) || {};
+
   const showMonth = monthPicker.value || monthNow(); // YYYY-MM
   displayMonthLabel.textContent = showMonth;
   const monthRecords = records.filter(r => r.date === showMonth);
@@ -186,7 +202,7 @@ function updateAllDisplays() {
   monthExpenseEl.textContent = expense;
   budgetRemainEl.textContent = budget - expense;
 
-  // ★追加: 入力欄にも反映
+  // ★入力欄にも必ず反映（ここで確実に表示を更新）
   budgetInput.value = budget;
 
   if (budget > 0 && expense > budget) {
