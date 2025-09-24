@@ -126,18 +126,14 @@ function deleteRecord(indexAll) {
 }
 
 // ---------- 表示更新 ----------
-// 表示は「monthPicker」で選んだ月に基づく
 function updateAllDisplays() {
   const showMonth = monthPicker.value || monthNow(); // YYYY-MM
   displayMonthLabel.textContent = showMonth;
-  // 月別フィルタ
   const monthRecords = records.filter(r => r.date === showMonth);
 
   // テーブルの再描画
   tableBody.innerHTML = "";
   monthRecords.forEach((r, idx) => {
-    // idxは月内インデックスだが削除は元配列インデックスが必要
-    // find index in original records (first matching that hasn't been spliced)
     let globalIdx = -1;
     let matched = 0;
     for (let i=0;i<records.length;i++){
@@ -160,7 +156,6 @@ function updateAllDisplays() {
     tableBody.appendChild(tr);
   });
 
-  // 削除ボタンにイベント付与
   document.querySelectorAll(".delete-btn").forEach(el => {
     el.onclick = () => {
       const idx = Number(el.getAttribute("data-idx"));
@@ -168,9 +163,9 @@ function updateAllDisplays() {
     };
   });
 
-  // 合計計算（表示月）
+  // 合計計算
   let income = 0, expense = 0;
-  const categoryTotals = {}; // for chart
+  const categoryTotals = {};
   categories.forEach(c => categoryTotals[c] = 0);
 
   monthRecords.forEach(r => {
@@ -185,29 +180,27 @@ function updateAllDisplays() {
   totalIncomeEl.textContent = income;
   totalExpenseEl.textContent = expense;
 
-  // 予算表示と残額、アラート
+  // 予算表示
   const budget = getBudgetForMonth(showMonth);
   budgetDisplay.textContent = budget;
   monthExpenseEl.textContent = expense;
   budgetRemainEl.textContent = budget - expense;
 
-  // もし予算 > 0 かつ 支出が予算超過したら視覚・アラート
+  // ★追加: 入力欄にも反映
+  budgetInput.value = budget;
+
   if (budget > 0 && expense > budget) {
-    // 画面上で目立たせる（赤くする）
     budgetRemainEl.style.color = "var(--danger)";
-    // そして一度だけアラートを出す（localStorageフラグで制御）
     const alertKey = `budget_alerted_${showMonth}`;
     if (!localStorage.getItem(alertKey)) {
       localStorage.setItem(alertKey, "1");
       alert(`注意: ${showMonth} の支出が予算 ${budget} 円を超えています！`);
     }
   } else {
-    budgetRemainEl.style.color = ""; // 元に戻す
+    budgetRemainEl.style.color = "";
   }
 
-  // グラフ更新（支出のみ）
   renderExpenseChart(categoryTotals);
-  // 保存（recordsは既に保存しているがカテゴリの変更を保存しておく）
   localStorage.setItem(KEY_CATEGORIES, JSON.stringify(categories));
 }
 
@@ -216,10 +209,7 @@ function renderExpenseChart(categoryTotals) {
   const labels = Object.keys(categoryTotals);
   const data = labels.map(l => categoryTotals[l] || 0);
 
-  // colors: 自動でHSLで割当（見やすく）
-  const colors = labels.map((_, i) => `hsl(${(i*47)%360} 70% 55%)`.replace(/\s/g, ","));
-  // Chart.js expects rgb/css colors; convert to standard hsl(...) form
-  const cssColors = labels.map((_,i) => `hsl(${(i*47)%360} 70% 55%)`.replace(/,/g," "));
+  const cssColors = labels.map((_,i) => `hsl(${(i*47)%360} 70% 55%)`);
 
   if (chart) chart.destroy();
   chart = new Chart(expenseChartCanvas.getContext("2d"), {
@@ -238,9 +228,8 @@ function renderExpenseChart(categoryTotals) {
   });
 }
 
-// ---------- イベント: 月変更で再描画 ----------
+// ---------- イベント: 月変更 ----------
 monthPicker.addEventListener("change", () => {
-  // 月が切り替わったら "アラート既出" フラグは別月なので自然に再チェックされる
   updateAllDisplays();
 });
 
