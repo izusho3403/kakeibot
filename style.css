@@ -8,7 +8,7 @@
 }
 
 body {
-  background-color: #fff;
+  background-color: #f8f8f8;
   color: #222;
   min-height: 100vh;
   line-height: 1.5;
@@ -16,7 +16,7 @@ body {
 
 /* ヘッダー */
 header {
-  background: linear-gradient(90deg, #222, #333);
+  background: linear-gradient(90deg, #333, #444);
   color: #fff;
   padding: 2rem 1rem;
   text-align: center;
@@ -29,7 +29,7 @@ header h1 {
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #f9d342; /* ゴールドアクセント */
+  color: #fff;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
 
@@ -52,7 +52,7 @@ main {
   justify-content: space-between;
   margin-bottom: 2rem;
   padding: 1rem;
-  background: linear-gradient(120deg, #fefefe, #f5f5f5);
+  background: linear-gradient(120deg, #fafafa, #f2f2f2);
   border-radius: 15px;
   box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
 }
@@ -62,6 +62,7 @@ main {
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
+  color: #222;
 }
 
 .budget-status {
@@ -73,7 +74,7 @@ main {
 
 .budget-status div {
   padding: 0.6rem 1rem;
-  background: linear-gradient(135deg, #fafafa, #eee);
+  background: linear-gradient(145deg, #f5f5f5, #eaeaea);
   border-radius: 10px;
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
   color: #222;
@@ -85,7 +86,7 @@ main {
 }
 
 .budget-status #budgetRemain {
-  color: #f9d342;
+  color: #333;
   font-weight: bold;
 }
 
@@ -93,7 +94,7 @@ main {
 .form-section {
   margin-bottom: 2rem;
   padding: 2rem;
-  background: linear-gradient(145deg, #fafafa, #f2f2f2);
+  background: linear-gradient(145deg, #fafafa, #f5f5f5);
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
   transition: all 0.3s;
@@ -120,15 +121,15 @@ main {
 
 .form-section input:focus,
 .form-section select:focus {
-  border-image: linear-gradient(45deg, #222, #f9d342) 1;
-  box-shadow: 0 0 10px rgba(249,211,66,0.5);
+  border-color: #333;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
   outline: none;
 }
 
 /* ボタン */
 .form-section button {
-  background: linear-gradient(135deg, #222, #444);
-  color: #f9d342;
+  background: linear-gradient(135deg, #333, #555);
+  color: #fff;
   border: none;
   padding: 0.7rem 1.6rem;
   border-radius: 10px;
@@ -138,7 +139,7 @@ main {
 }
 
 .form-section button:hover {
-  background: linear-gradient(135deg, #444, #666);
+  background: linear-gradient(135deg, #555, #777);
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
@@ -157,14 +158,14 @@ main {
 
 .add-category button {
   flex: 1;
-  background: linear-gradient(135deg, #222, #444);
-  color: #f9d342;
+  background: linear-gradient(135deg, #333, #555);
+  color: #fff;
   border-radius: 10px;
   transition: all 0.3s;
 }
 
 .add-category button:hover {
-  background: linear-gradient(135deg, #444, #666);
+  background: linear-gradient(135deg, #555, #777);
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
@@ -191,8 +192,8 @@ main {
 }
 
 #recordTable th {
-  background: linear-gradient(90deg, #222, #333);
-  color: #f9d342;
+  background: linear-gradient(90deg, #333, #444);
+  color: #fff;
   font-weight: 600;
 }
 
