@@ -1,41 +1,44 @@
-/* style.css */
+/* style.css - 女の子向けおしゃれ版 */
 
 /* リセット & ベース */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', 'Yu Gothic', 'Hiragino Kaku Gothic Pro', sans-serif;
+  font-family: 'Noto Sans JP', 'Yu Gothic', 'Hiragino Kaku Gothic Pro', sans-serif;
 }
 
 body {
-  background: linear-gradient(120deg, #f0f4ff, #d9e4ff);
-  color: #333;
+  background: linear-gradient(135deg, #ffe6f0, #fff0f5);
+  color: #444;
   min-height: 100vh;
 }
 
 /* ヘッダー */
 header {
-  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  background: linear-gradient(90deg, #ff9acb, #ffb6d5);
   color: white;
   padding: 2rem 1rem;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 header h1 {
   font-size: 2rem;
   letter-spacing: 1px;
+  font-weight: 700;
 }
 
 /* メイン */
 main {
   max-width: 1000px;
-  margin: 2rem auto;
-  padding: 1rem;
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  margin: -1rem auto 2rem;
+  padding: 2rem;
+  background: #fff5fb;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
 /* コントロールセクション */
@@ -46,38 +49,41 @@ main {
   justify-content: space-between;
   margin-bottom: 2rem;
   padding: 1rem;
-  background: #f6f8ff;
-  border-radius: 10px;
+  background: #ffe6f0;
+  border-radius: 15px;
+  box-shadow: inset 0 2px 5px rgba(255,182,193,0.2);
 }
 
 .controls label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: bold;
+  font-weight: 600;
+  color: #d6336c;
 }
 
 .budget-status {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   align-items: center;
-  font-weight: bold;
+  font-weight: 600;
+  color: #d6336c;
 }
 
 .budget-status div {
   padding: 0.5rem 1rem;
-  background: #eef1ff;
-  border-radius: 8px;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  background: #ffd9e6;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(255,182,193,0.3);
 }
 
 /* 入力フォーム */
 .form-section {
   margin-bottom: 2rem;
-  padding: 1rem;
-  background: #fefefe;
-  border-radius: 10px;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  padding: 1.5rem;
+  background: #fff0f7;
+  border-radius: 15px;
+  box-shadow: inset 0 2px 6px rgba(255,182,193,0.2);
 }
 
 .form-section .row {
@@ -91,9 +97,9 @@ main {
 .form-section input[type="number"],
 .form-section input[type="date"],
 .form-section select {
-  padding: 0.5rem 1rem;
-  border: 2px solid #d0d4ff;
-  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  border: 2px solid #ffcce0;
+  border-radius: 12px;
   font-size: 1rem;
   flex: 1;
   transition: border 0.2s, box-shadow 0.2s;
@@ -101,24 +107,24 @@ main {
 
 .form-section input:focus,
 .form-section select:focus {
-  border-color: #6a11cb;
-  box-shadow: 0 0 5px rgba(106,17,203,0.3);
+  border-color: #ff69b4;
+  box-shadow: 0 0 8px rgba(255,105,180,0.3);
   outline: none;
 }
 
 .form-section button {
-  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  background: linear-gradient(90deg, #ff9acb, #ff69b4);
   color: white;
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
+  padding: 0.6rem 1.4rem;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
   transition: background 0.3s, transform 0.2s;
 }
 
 .form-section button:hover {
-  background: linear-gradient(90deg, #2575fc, #6a11cb);
+  background: linear-gradient(90deg, #ff69b4, #ff9acb);
   transform: translateY(-2px);
 }
 
@@ -152,56 +158,56 @@ main {
 #recordTable td {
   padding: 0.6rem 0.8rem;
   text-align: center;
-  border-bottom: 1px solid #e0e4ff;
+  border-bottom: 1px solid #ffe6f0;
 }
 
 #recordTable th {
-  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  background: linear-gradient(90deg, #ff9acb, #ffb6d5);
   color: white;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 #recordTable tbody tr:nth-child(even) {
-  background: #f7f8ff;
+  background: #fff0f7;
 }
 
 .delete-btn {
-  color: #ff4d4f;
+  color: #ff4d79;
   font-weight: bold;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .delete-btn:hover {
-  color: #d40000;
+  color: #d4005b;
 }
 
 /* グラフセクション */
 section h2 {
   margin-top: 2rem;
   margin-bottom: 1rem;
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 1.3rem;
+  color: #d6336c;
 }
 
 canvas {
   max-width: 100%;
   border-radius: 15px;
-  background: #f6f8ff;
+  background: #ffe6f0;
   padding: 1rem;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: inset 0 2px 5px rgba(255,182,193,0.2);
 }
 
 /* 合計表示 */
 .summary {
   margin-top: 2rem;
   text-align: center;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 1.1rem;
   padding: 1rem;
-  background: #f0f4ff;
-  border-radius: 10px;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  background: #ffd9e6;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 5px rgba(255,182,193,0.2);
 }
 
 /* ラジオボタンスタイル */
@@ -209,6 +215,7 @@ canvas {
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  color: #d6336c;
 }
 
 /* レスポンシブ */
